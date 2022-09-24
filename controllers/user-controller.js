@@ -53,13 +53,21 @@ const userController = {
         nest: true,
         raw: true
       }),
-      User.findByPk(id, { raw: true })
+      User.findByPk(id, {
+        include: [
+          { model: Restaurant, as: 'FavoritedRestaurants' },
+          { model: User, as: 'Followers' }, // 追蹤我的（粉絲）
+          { model: User, as: 'Followings' } // 我追蹤的 追蹤中
+        ]
+      })
     ])
       .then(([comments, userProfile]) => {
+        // 收藏餐廳用FavoritedRestaurants
+        // 追蹤我的用Followers, 我追蹤的用Followings
         if (!userProfile) throw new Error("User is didn't exist!")
         res.render('users/profile', {
           user: reqUser,
-          userProfile,
+          userProfile: userProfile.toJSON(),
           comments
         })
       })
